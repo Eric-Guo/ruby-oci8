@@ -37,6 +37,7 @@ jobs:
           unzip sqlplus.zip -x "META-INF/*"
           unzip sdk.zip -x "META-INF/*"
           IC_DIR=$PWD/$(ls -d instantclient*)
+          ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 $IC_DIR/libaio.so.1
           echo LD_LIBRARY_PATH=$IC_DIR:$LD_LIBRARY_PATH >> $GITHUB_ENV
           echo $IC_DIR >> $GITHUB_PATH
 
