@@ -860,6 +860,11 @@ int plthook_enum_with_prot(plthook_t *plthook, unsigned int *pos, const char **n
     return EOF;
 }
 
+int plthook_enum_entry(plthook_t *plthook, unsigned int *pos, plthook_entry_t *entry)
+{
+    return plthook_enum_with_prot(plthook, pos, &entry->name, &entry->addr, &entry->prot);
+}
+
 int plthook_replace(plthook_t *plthook, const char *funcname, void *funcaddr, void **oldfunc)
 {
     size_t funcnamelen = strlen(funcname);
