@@ -132,12 +132,10 @@ static void rebind_internal_symbols(void)
     int flags = RTLD_LAZY | RTLD_NOLOAD;
     plthook_t *ph;
     unsigned int pos = 0;
-    const char *name;
-    void **addr;
     const char *prefix;
     size_t prefix_len;
-    int prot;
     size_t page_size = sysconf(_SC_PAGESIZE);
+    plthook_entry_t entry;
 
 #ifdef RTLD_FIRST
     flags |= RTLD_FIRST; /* for macOS */
@@ -164,7 +162,10 @@ static void rebind_internal_symbols(void)
         plthook_close(ph);
         return;
     }
-    while (plthook_enum_with_prot(ph, &pos, &name, &addr, &prot) == 0) {
+    while (plthook_enum_entry(ph, &pos, &entry) == 0) {
+        const char *name = entry.name;
+        void **addr = entry.addr;
+        int prot = entry.prot;
         void *funcaddr;
         if (prefix_len != 0) {
             if (strncmp(name, prefix, prefix_len) != 0) {
@@ -177,6 +178,9 @@ static void rebind_internal_symbols(void)
             continue;
         }
         funcaddr = dlsym(handle, name);
+#ifdef __APPLE__
+        funcaddr = (void*)((size_t)funcaddr + entry.addend);
+#endif
         if (funcaddr != NULL && *addr != funcaddr) {
             /* If libclntsh.so exports and imports same functions, their
              * PLT entries are forcedly modified to point to itself not
